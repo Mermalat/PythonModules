@@ -14,7 +14,7 @@ def display_file(file_name: str) -> None:
         return
 
     try:
-        content = archive_file.read()
+        content: str = archive_file.read()
         print("---\n" + content + "---")
     except Exception as error:
         print(f"Error reading file '{file_name}': {error}")
