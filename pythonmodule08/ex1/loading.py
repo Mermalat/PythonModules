@@ -37,11 +37,11 @@ def load_required_modules() -> dict[str, ModuleType]:
         return {}
 
 
-def get_module_version(module: ModuleType) -> str:
-    version = getattr(module, "__version__", "unknown")
-    if isinstance(version, str):
-        return version
-    return "unknown"
+# def get_module_version(module: ModuleType) -> str:
+#     version = getattr(module, "__version__", "unknown")
+#     if isinstance(version, str):
+#         return version
+#     return "unknown"
 
 
 def check_dependencies() -> list[str]:
