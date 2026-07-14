@@ -1,6 +1,8 @@
 import os
 import sys
-from pathlib import Path
+
+
+ENV_FILE = os.path.join(os.path.dirname(os.path.abspath(__file__)), ".env")
 
 
 REQUIRED_KEYS = [
@@ -21,7 +23,7 @@ def load_dotenv_file() -> bool:
         print("Continuing with existing environment variables only.")
         return False
 
-    return load_dotenv()
+    return load_dotenv(dotenv_path=ENV_FILE, override=False)
 
 
 def get_config() -> dict[str, str | None]:
@@ -32,11 +34,16 @@ def get_mode(config: dict[str, str | None]) -> str:
     mode = config["MATRIX_MODE"]
     if mode in ("development", "production"):
         return mode
+    if mode:
+        print(
+            "[WARN] MATRIX_MODE must be 'development' or 'production'; "
+            "using development"
+        )
     return "development"
 
 
 def describe_database(database_url: str | None, mode: str) -> str:
-    if database_url is None:
+    if not database_url:
         return "Missing DATABASE_URL"
     if mode == "development":
         return "Connected to local instance"
@@ -44,13 +51,13 @@ def describe_database(database_url: str | None, mode: str) -> str:
 
 
 def describe_api(api_key: str | None) -> str:
-    if api_key is None:
+    if not api_key:
         return "Missing API_KEY"
     return "Authenticated"
 
 
 def describe_zion(endpoint: str | None) -> str:
-    if endpoint is None:
+    if not endpoint:
         return "Offline"
     return "Online"
 
@@ -68,14 +75,23 @@ def show_missing_config(config: dict[str, str | None]) -> None:
     print("Then edit .env with your own values.")
 
 
-def show_security_check(dotenv_loaded: bool) -> None:
-    env_file = Path(".env")
+def is_valid_config(config: dict[str, str | None]) -> bool:
+    values_present = all(value for value in config.values())
+    valid_mode = config["MATRIX_MODE"] in ("development", "production")
+    return values_present and valid_mode
 
+
+def show_security_check(
+    dotenv_loaded: bool, config: dict[str, str | None]
+) -> None:
+    env_file_exists = os.path.isfile(ENV_FILE)
     print("Environment security check:")
     print("[OK] No hardcoded secrets detected")
-    if env_file.exists() and dotenv_loaded:
+    if env_file_exists and dotenv_loaded and is_valid_config(config):
         print("[OK] .env file properly configured")
-    elif env_file.exists():
+    elif env_file_exists and dotenv_loaded:
+        print("[WARN] .env loaded but required values are missing")
+    elif env_file_exists:
         print("[WARN] .env exists but python-dotenv did not load it")
     else:
         print("[WARN] .env file not found; using environment/defaults")
@@ -97,10 +113,10 @@ def main() -> None:
     print(f"Zion Network: {describe_zion(config['ZION_ENDPOINT'])}")
 
     show_missing_config(config)
-    show_security_check(dotenv_loaded)
+    show_security_check(dotenv_loaded, config)
     print("The Oracle sees all configurations.")
 
-    if any(value is None for value in config.values()):
+    if not is_valid_config(config):
         sys.exit(1)
 
 

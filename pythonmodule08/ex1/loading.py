@@ -2,11 +2,9 @@ import importlib
 import importlib.metadata
 import importlib.util
 import sys
-from types import ModuleType
-from typing import Any
 
 
-REQUIRED_PACKAGES = {
+REQUIRED_PACKAGES: dict[str, str] = {
     "numpy": "Numerical computation ready",
     "pandas": "Data manipulation ready",
     "matplotlib": "Visualization ready",
@@ -26,22 +24,16 @@ def is_package_available(package_name: str) -> bool:
     return True
 
 
-def load_required_modules() -> dict[str, ModuleType]:
+def load_required_modules() -> dict[str, object]:
     try:
-        return {
+        modules: dict[str, object] = {
             "numpy": importlib.import_module("numpy"),
             "pandas": importlib.import_module("pandas"),
             "matplotlib": importlib.import_module("matplotlib"),
         }
+        return modules
     except ImportError:
         return {}
-
-
-# def get_module_version(module: ModuleType) -> str:
-#     version = getattr(module, "__version__", "unknown")
-#     if isinstance(version, str):
-#         return version
-#     return "unknown"
 
 
 def check_dependencies() -> list[str]:
@@ -76,26 +68,29 @@ def show_package_manager_comparison() -> None:
     print("Poetry uses pyproject.toml to manage metadata and lock files.")
 
 
-def simulate_matrix_data(numpy_module: ModuleType) -> Any:
-    random_generator = numpy_module.random.default_rng(seed=101)
+def simulate_matrix_data(numpy_module: object) -> dict[str, object]:
+    random_module = getattr(numpy_module, "random")
+    random_generator = random_module.default_rng(seed=101)
     signal = random_generator.normal(loc=50.0, scale=12.0, size=1000)
     anomaly = random_generator.integers(low=0, high=2, size=1000)
     latency = signal + (anomaly * random_generator.normal(18.0, 4.0, 1000))
-    return {
+    data: dict[str, object] = {
         "signal_strength": signal,
         "anomaly_flag": anomaly,
         "latency_ms": latency,
     }
+    return data
 
 
-def analyze_data(modules: dict[str, ModuleType]) -> None:
+def analyze_data(modules: dict[str, object]) -> None:
     numpy_module = modules["numpy"]
     pandas_module = modules["pandas"]
     pyplot = importlib.import_module("matplotlib.pyplot")
 
     print("Analyzing Matrix data...")
     data = simulate_matrix_data(numpy_module)
-    dataframe = pandas_module.DataFrame(data)
+    dataframe_constructor = getattr(pandas_module, "DataFrame")
+    dataframe = dataframe_constructor(data)
 
     print(f"Processing {len(dataframe)} data points...")
     summary = dataframe[["signal_strength", "latency_ms"]].mean()
