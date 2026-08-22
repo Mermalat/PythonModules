@@ -6,6 +6,7 @@ from typing import Any
 
 def spell_timer(func: Callable[..., Any]) -> Callable[..., Any]:
     print(f"{spell_timer.__name__} decorator applied to {func.__name__}")
+    
     @wraps(func)
     def wrapper() -> Any:
         start_time = perf_counter()
