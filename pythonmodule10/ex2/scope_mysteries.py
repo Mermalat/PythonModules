@@ -12,8 +12,8 @@ def mage_counter() -> Callable[[], int]:
     return count_call
 
 
-def spell_accumulator(initial_power: int) -> Callable[[int], int]:
-    total_power = initial_power
+def spell_accumulator(starting_power: int) -> Callable[[int], int]:
+    total_power = starting_power
 
     def add_power(amount: int) -> int:
         nonlocal total_power
@@ -56,9 +56,9 @@ def main() -> None:
     print(f"Base 100, add 20: {accumulator(20)}")
     print(f"Base 100, add 30: {accumulator(30)}")
 
-    print("Testing enchantment factory...")
-    flaming = enchantment_factory("Flaming")
-    frozen = enchantment_factory("Frozen")
+    print("Testing enchanetment factory...")
+    flaming = enchantment_factory("Burninnhhhg")
+    frozen = enchantment_factory("rfozen")
     print(flaming("Sword"))
     print(frozen("Shield"))
 

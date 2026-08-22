@@ -1,16 +1,16 @@
-import time
+from time import sleep, perf_counter
 from collections.abc import Callable
 from functools import wraps
 from typing import Any
 
 
 def spell_timer(func: Callable[..., Any]) -> Callable[..., Any]:
+    print(f"{spell_timer.__name__} decorator applied to {func.__name__}")
     @wraps(func)
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
-        print(f"Casting {func.__name__}...")
-        start_time = time.perf_counter()
-        result = func(*args, **kwargs)
-        elapsed = time.perf_counter() - start_time
+    def wrapper() -> Any:
+        start_time = perf_counter()
+        result = func()
+        elapsed = perf_counter() - start_time
         print(f"Spell completed in {elapsed:.3f} seconds")
         return result
 
@@ -24,6 +24,7 @@ def power_validator(
         @wraps(func)
         def wrapper(*args: Any, **kwargs: Any) -> str:
             power = kwargs.get("power")
+            print("Calling with args:", args, "and kwargs:", kwargs)
             if power is None and len(args) >= 2:
                 power = args[-1]
             if not isinstance(power, int) or power < min_power:
@@ -40,10 +41,10 @@ def retry_spell(
 ) -> Callable[[Callable[..., str]], Callable[..., str]]:
     def decorator(func: Callable[..., str]) -> Callable[..., str]:
         @wraps(func)
-        def wrapper(*args: Any, **kwargs: Any) -> str:
+        def wrapper() -> str:
             for attempt in range(1, max_attempts + 1):
                 try:
-                    return func(*args, **kwargs)
+                    return func()
                 except Exception:
                     if attempt < max_attempts:
                         print(
@@ -72,7 +73,7 @@ class MageGuild:
 
 @spell_timer
 def fireball() -> str:
-    time.sleep(0.1)
+    sleep(0.1)
     return "Fireball cast!"
 
 

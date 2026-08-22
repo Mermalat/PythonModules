@@ -1,5 +1,5 @@
-import functools
-import operator
+from functools import reduce, partial, lru_cache, singledispatch
+from operator import add, mul, ge, le
 from collections.abc import Callable
 from typing import Any
 
@@ -9,20 +9,20 @@ def spell_reducer(spells: list[int], operation: str) -> int:
         return 0
 
     if operation == "add":
-        return functools.reduce(operator.add, spells)
+        return reduce(add, spells)
     if operation == "multiply":
-        return functools.reduce(operator.mul, spells)
+        return reduce(mul, spells)
     if operation == "max":
-        return functools.reduce(
+        return reduce(
             lambda current, next_power: (
-                current if operator.ge(current, next_power) else next_power
+                current if ge(current, next_power) else next_power
             ),
             spells,
         )
     if operation == "min":
-        return functools.reduce(
+        return reduce(
             lambda current, next_power: (
-                current if operator.le(current, next_power) else next_power
+                current if le(current, next_power) else next_power
             ),
             spells,
         )
@@ -33,13 +33,13 @@ def partial_enchanter(
     base_enchantment: Callable[[int, str, str], str],
 ) -> dict[str, Callable[[str], str]]:
     return {
-        "fire": functools.partial(base_enchantment, 50, "fire"),
-        "ice": functools.partial(base_enchantment, 50, "ice"),
-        "lightning": functools.partial(base_enchantment, 50, "lightning"),
+        "fire": partial(base_enchantment, 50, "fire"),
+        "ice": partial(base_enchantment, 50, "ice"),
+        "lightning": partial(base_enchantment, 50, "lightning"),
     }
 
 
-@functools.lru_cache(maxsize=None)
+@lru_cache(maxsize=None)
 def memoized_fibonacci(n: int) -> int:
     if n < 0:
         raise ValueError("Fibonacci index cannot be negative")
@@ -49,7 +49,7 @@ def memoized_fibonacci(n: int) -> int:
 
 
 def spell_dispatcher() -> Callable[[Any], str]:
-    @functools.singledispatch
+    @singledispatch
     def cast_spell(spell_data: Any) -> str:
         return "Unknown spell type"
 
